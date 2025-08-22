@@ -1,0 +1,91 @@
+# Flutter/Dart specific
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+.pub/
+/build/
+*.lock
+
+# iOS specific
+ios/Pods/
+ios/.symlinks/
+ios/Flutter/Generated.xcconfig
+ios/Flutter/flutter_export_environment.sh
+ios/Runner.xcworkspace/xcshareddata/
+ios/Runner.xcodeproj/xcuserdata/
+ios/Runner.xcodeproj/project.xcworkspace/xcuserdata/
+ios/build/
+ios/backup_*/
+
+# Android specific
+android/.gradle/
+android/captures/
+android/gradlew
+android/gradlew.bat
+android/local.properties
+android/GeneratedPluginRegistrant.java
+android/key.properties
+android/app/debug
+android/app/profile
+android/app/release
+
+# IDE specific
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS specific
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Logs
+*.log
+flutter_*.log
+xcodebuild_*.log
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+*.backup
+
+# Environment files
+.env
+.env.local
+.env.production
+.env.staging
+
+# Firebase
+google-services.json
+GoogleService-Info.plist
+
+# Keystore files
+*.keystore
+*.jks
+*.p12
+*.p8
+
+# Provisioning profiles
+*.mobileprovision
+*.provisionprofile
+
+# App Store Connect
+*.p8
+*.p12
+
+# Test coverage
+coverage/
+*.lcov
+
+# Generated files
+lib/generated_plugin_registrant.dart
+lib/env.g.dart
