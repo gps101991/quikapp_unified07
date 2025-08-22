@@ -68,8 +68,20 @@ log_info "  Chat Bot: $IS_CHATBOT"
 
 # Always add network security settings for Flutter apps
 log_info "Adding network security settings..."
-update_info_plist "NSAppTransportSecurity" "NSAppTransportSecurity"
-update_info_plist "NSAppTransportSecurity:NSAllowsArbitraryLoads" "true"
+# First, add the NSAppTransportSecurity dictionary
+if ! /usr/libexec/PlistBuddy -c "Print :NSAppTransportSecurity" "ios/Runner/Info.plist" 2>/dev/null; then
+    /usr/libexec/PlistBuddy -c "Add :NSAppTransportSecurity dict" "ios/Runner/Info.plist"
+    log_success "Added NSAppTransportSecurity dictionary to Info.plist"
+fi
+
+# Then add the NSAllowsArbitraryLoads key within the dictionary
+if ! /usr/libexec/PlistBuddy -c "Print :NSAppTransportSecurity:NSAllowsArbitraryLoads" "ios/Runner/Info.plist" 2>/dev/null; then
+    /usr/libexec/PlistBuddy -c "Add :NSAppTransportSecurity:NSAllowsArbitraryLoads bool true" "ios/Runner/Info.plist"
+    log_success "Added NSAllowsArbitraryLoads to NSAppTransportSecurity"
+else
+    /usr/libexec/PlistBuddy -c "Set :NSAppTransportSecurity:NSAllowsArbitraryLoads true" "ios/Runner/Info.plist"
+    log_success "Updated NSAllowsArbitraryLoads in NSAppTransportSecurity"
+fi
 
 # Camera Permission
 if [[ "$IS_CAMERA" == "true" ]]; then

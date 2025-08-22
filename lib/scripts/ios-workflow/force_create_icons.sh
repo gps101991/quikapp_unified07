@@ -156,131 +156,49 @@ for i in "${!icon_sizes[@]}"; do
     fi
 done
 
-# Create Contents.json
-log_info "Creating Contents.json..."
+# Create Contents.json dynamically
+log_info "Creating Contents.json dynamically..."
 cat > "$ICON_DIR/Contents.json" << 'EOF'
 {
   "images" : [
+EOF
+
+# Generate Contents.json entries dynamically from the icon arrays
+for i in "${!icon_sizes[@]}"; do
+    size="${icon_sizes[$i]}"
+    filename="${icon_filenames[$i]}"
+    
+    # Parse the size string to extract dimensions and scale
+    if [[ "$size" =~ ^([0-9]+\.?[0-9]*)x([0-9]+\.?[0-9]*)@([0-9]+)x$ ]]; then
+        width="${BASH_REMATCH[1]}"
+        height="${BASH_REMATCH[2]}"
+        scale="${BASH_REMATCH[3]}"
+        
+        # Determine idiom based on size
+        if [[ "$width" == "1024" ]]; then
+            idiom="ios-marketing"
+        elif [[ "$width" == "76" ]] || [[ "$width" == "87" ]] || [[ "$width" == "152" ]] || [[ "$width" == "167" ]]; then
+            idiom="ipad"
+        else
+            idiom="iphone"
+        fi
+        
+        # Add the icon entry to Contents.json
+        cat >> "$ICON_DIR/Contents.json" << EOF
     {
-      "idiom" : "iphone",
-      "scale" : "2x",
-      "size" : "20x20",
-      "filename" : "Icon-App-20x20@2x.png"
+      "idiom" : "$idiom",
+      "scale" : "${scale}x",
+      "size" : "${width}x${height}",
+      "filename" : "$filename"
     },
-    {
-      "idiom" : "iphone",
-      "scale" : "3x",
-      "size" : "20x20",
-      "filename" : "Icon-App-20x20@3x.png"
-    },
-    {
-      "idiom" : "iphone",
-      "scale" : "2x",
-      "size" : "29x29",
-      "filename" : "Icon-App-29x29@2x.png"
-    },
-    {
-      "idiom" : "iphone",
-      "scale" : "3x",
-      "size" : "29x29",
-      "filename" : "Icon-App-29x29@3x.png"
-    },
-    {
-      "idiom" : "iphone",
-      "scale" : "2x",
-      "size" : "40x40",
-      "filename" : "Icon-App-40x40@2x.png"
-    },
-    {
-      "idiom" : "iphone",
-      "scale" : "3x",
-      "size" : "40x40",
-      "filename" : "Icon-App-40x40@3x.png"
-    },
-    {
-      "idiom" : "iphone",
-      "scale" : "2x",
-      "size" : "60x60",
-      "filename" : "Icon-App-60x60@2x.png"
-    },
-    {
-      "idiom" : "iphone",
-      "scale" : "3x",
-      "size" : "60x60",
-      "filename" : "Icon-App-60x60@3x.png"
-    },
-    {
-      "idiom" : "ipad",
-      "scale" : "1x",
-      "size" : "20x20",
-      "filename" : "Icon-App-20x20@1x.png"
-    },
-    {
-      "idiom" : "ipad",
-      "scale" : "2x",
-      "size" : "20x20",
-      "filename" : "Icon-App-20x20@2x.png"
-    },
-    {
-      "idiom" : "ipad",
-      "scale" : "1x",
-      "size" : "29x29",
-      "filename" : "Icon-App-29x29@1x.png"
-    },
-    {
-      "idiom" : "ipad",
-      "scale" : "2x",
-      "size" : "29x29",
-      "filename" : "Icon-App-29x29@2x.png"
-    },
-    {
-      "idiom" : "ipad",
-      "scale" : "1x",
-      "size" : "40x40",
-      "filename" : "Icon-App-40x40@1x.png"
-    },
-    {
-      "idiom" : "ipad",
-      "scale" : "2x",
-      "size" : "40x40",
-      "filename" : "Icon-App-40x40@2x.png"
-    },
-    {
-      "idiom" : "ipad",
-      "scale" : "2x",
-      "size" : "76x76",
-      "filename" : "Icon-App-76x76@2x.png"
-    },
-    {
-      "idiom" : "ipad",
-      "scale" : "2x",
-      "size" : "87x87",
-      "filename" : "Icon-App-87x87@2x.png"
-    },
-    {
-      "idiom" : "ios-marketing",
-      "scale" : "1x",
-      "size" : "1024x1024",
-      "filename" : "Icon-App-1024x1024@1x.png"
-    },
-    {
-      "idiom" : "iphone",
-      "scale" : "1x",
-      "size" : "120x120",
-      "filename" : "Icon-App-120x120@1x.png"
-    },
-    {
-      "idiom" : "ipad",
-      "scale" : "1x",
-      "size" : "152x152",
-      "filename" : "Icon-App-152x152@1x.png"
-    },
-    {
-      "idiom" : "ipad",
-      "scale" : "1x",
-      "size" : "167x167",
-      "filename" : "Icon-App-167x167@1x.png"
-    }
+EOF
+    fi
+done
+
+# Remove the trailing comma from the last entry and close the JSON
+sed -i '' '$ s/,$//' "$ICON_DIR/Contents.json"
+
+cat >> "$ICON_DIR/Contents.json" << 'EOF'
   ],
   "info" : {
     "author" : "xcode",
