@@ -56,11 +56,22 @@ create_simple_icon() {
     local filename="$2"
     local output_path="$ICON_DIR/$filename"
     
-    if [[ "$size" =~ ^([0-9]+)x([0-9]+)@[0-9]+x$ ]]; then
+    if [[ "$size" =~ ^([0-9]+\.?[0-9]*)x([0-9]+\.?[0-9]*)@([0-9]+)x$ ]]; then
         local width="${BASH_REMATCH[1]}"
         local height="${BASH_REMATCH[2]}"
+        local scale="${BASH_REMATCH[3]}"
         
-        log_info "Creating simple icon $size ($width x $height) -> $filename"
+        # Convert decimal dimensions to actual pixel dimensions
+        local actual_width=$(echo "$width * $scale" | bc -l 2>/dev/null | cut -d. -f1)
+        local actual_height=$(echo "$height * $scale" | bc -l 2>/dev/null | cut -d. -f1)
+        
+        # Fallback if bc is not available
+        if [[ -z "$actual_width" ]] || [[ -z "$actual_height" ]]; then
+            actual_width=$(printf "%.0f" "$width" 2>/dev/null || echo "$width")
+            actual_height=$(printf "%.0f" "$height" 2>/dev/null || echo "$height")
+        fi
+        
+        log_info "Creating simple icon $size (${actual_width}x${actual_height} pixels) -> $filename"
         
         # Try to copy the source image first
         if cp assets/images/logo.png "$output_path" 2>/dev/null; then
@@ -70,7 +81,7 @@ create_simple_icon() {
         
         # If that fails, create a simple colored square using ImageMagick
         if command -v convert >/dev/null 2>&1; then
-            if convert -size "${width}x${height}" xc:#667eea "$output_path" 2>/dev/null; then
+            if convert -size "${actual_width}x${actual_height}" xc:#667eea "$output_path" 2>/dev/null; then
                 log_success "Created simple icon for $filename using ImageMagick"
                 return 0
             fi
@@ -90,9 +101,6 @@ create_simple_icon() {
 # Required icon sizes for App Store validation
 # Using parallel arrays to avoid associative array issues
 icon_sizes=(
-    "120x120@1x"
-    "152x152@1x"
-    "167x167@1x"
     "20x20@1x"
     "20x20@2x"
     "20x20@3x"
@@ -106,15 +114,15 @@ icon_sizes=(
     "60x60@3x"
     "76x76@1x"
     "76x76@2x"
-    "83.5x83.5@2x"
+    "87x87@2x"
+    "120x120@1x"
+    "152x152@1x"
+    "167x167@1x"
     "1024x1024@1x"
-    "76x76@1x"
+    "1024x1024@2x"
 )
 
 icon_filenames=(
-    "Icon-App-120x120@1x.png"
-    "Icon-App-152x152@1x.png"
-    "Icon-App-167x167@1x.png"
     "Icon-App-20x20@1x.png"
     "Icon-App-20x20@2x.png"
     "Icon-App-20x20@3x.png"
@@ -128,9 +136,12 @@ icon_filenames=(
     "Icon-App-60x60@3x.png"
     "Icon-App-76x76@1x.png"
     "Icon-App-76x76@2x.png"
-    "Icon-App-83.5x83.5@2x.png"
+    "Icon-App-87x87@2x.png"
+    "Icon-App-120x120@1x.png"
+    "Icon-App-152x152@1x.png"
+    "Icon-App-167x167@1x.png"
     "Icon-App-1024x1024@1x.png"
-    "Icon-App-76x76@1x.png"
+    "Icon-App-1024x1024@2x.png"
 )
 
 # Create all required icons
@@ -243,8 +254,8 @@ cat > "$ICON_DIR/Contents.json" << 'EOF'
     {
       "idiom" : "ipad",
       "scale" : "2x",
-      "size" : "83.5x83.5",
-      "filename" : "Icon-App-83.5x83.5@2x.png"
+      "size" : "87x87",
+      "filename" : "Icon-App-87x87@2x.png"
     },
     {
       "idiom" : "ios-marketing",

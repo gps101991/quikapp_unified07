@@ -198,7 +198,7 @@ icon_sizes=(
     "60x60@3x"
     "76x76@1x"
     "76x76@2x"
-    "83.5x83.5@2x"
+    "87x87@2x"
     "1024x1024@1x"
     # Additional required sizes for App Store validation
     "120x120@1x"
@@ -220,7 +220,7 @@ icon_filenames=(
     "Icon-App-60x60@3x.png"
     "Icon-App-76x76@1x.png"
     "Icon-App-76x76@2x.png"
-    "Icon-App-83.5x83.5@2x.png"
+    "Icon-App-87x87@2x.png"
     "Icon-App-1024x1024@1x.png"
     # Additional required sizes for App Store validation
     "Icon-App-120x120@1x.png"
@@ -235,32 +235,43 @@ generate_icon() {
     local output_path="ios/Runner/Assets.xcassets/AppIcon.appiconset/$filename"
     
     # Extract dimensions from size string
-    if [[ "$size" =~ ^([0-9]+)x([0-9]+)@[0-9]+x$ ]]; then
+    if [[ "$size" =~ ^([0-9]+\.?[0-9]*)x([0-9]+\.?[0-9]*)@([0-9]+)x$ ]]; then
         local width="${BASH_REMATCH[1]}"
         local height="${BASH_REMATCH[2]}"
+        local scale="${BASH_REMATCH[3]}"
         
-        log_info "Generating $size icon ($width x $height) -> $filename"
+        # Convert decimal dimensions to actual pixel dimensions
+        local actual_width=$(echo "$width * $scale" | bc -l 2>/dev/null | cut -d. -f1)
+        local actual_height=$(echo "$height * $scale" | bc -l 2>/dev/null | cut -d. -f1)
+        
+        # Fallback if bc is not available
+        if [[ -z "$actual_width" ]] || [[ -z "$actual_height" ]]; then
+            actual_width=$(printf "%.0f" "$width" 2>/dev/null || echo "$width")
+            actual_height=$(printf "%.0f" "$height" 2>/dev/null || echo "$height")
+        fi
+        
+        log_info "Generating $size icon (${actual_width}x${actual_height} pixels) -> $filename"
         
         # Method 1: Standard sips resize
-        if sips -z "$height" "$width" assets/images/logo.png --out "$output_path" >/dev/null 2>&1; then
+        if sips -z "$actual_height" "$actual_width" assets/images/logo.png --out "$output_path" >/dev/null 2>&1; then
             log_success "Generated $filename (method 1)"
             return 0
         fi
         
         # Method 2: sips with format specification
-        if sips -s format png --resampleHeightWidth "$height" "$width" assets/images/logo.png --out "$output_path" >/dev/null 2>&1; then
+        if sips -s format png --resampleHeightWidth "$actual_height" "$actual_width" assets/images/logo.png --out "$output_path" >/dev/null 2>&1; then
             log_success "Generated $filename (method 2)"
             return 0
         fi
         
         # Method 3: sips with crop to center
-        if sips -c "$height" "$width" assets/images/logo.png --out "$output_path" >/dev/null 2>&1; then
+        if sips -c "$actual_height" "$actual_width" assets/images/logo.png --out "$output_path" >/dev/null 2>&1; then
             log_success "Generated $filename (method 3)"
             return 0
         fi
         
         # Method 4: sips with fit
-        if sips -Z "$width" assets/images/logo.png --out "$output_path" >/dev/null 2>&1; then
+        if sips -Z "$actual_width" assets/images/logo.png --out "$output_path" >/dev/null 2>&1; then
             log_success "Generated $filename (method 4)"
             return 0
         fi
@@ -402,8 +413,8 @@ cat > ios/Runner/Assets.xcassets/AppIcon.appiconset/Contents.json << 'EOF'
     {
       "idiom" : "ipad",
       "scale" : "2x",
-      "size" : "83.5x83.5",
-      "filename" : "Icon-App-83.5x83.5@2x.png"
+      "size" : "87x87",
+      "filename" : "Icon-App-87x87@2x.png"
     },
     {
       "idiom" : "ios-marketing",
