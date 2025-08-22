@@ -16,6 +16,33 @@ log() { echo "📌 $1"; }
 
 echo "🚀 Starting Improved iOS Workflow..."
 
+# Pre-flight script validation
+log_info "🔍 Pre-flight script validation..."
+REQUIRED_SCRIPTS=(
+    "lib/scripts/ios-workflow/robust_xcconfig_fix.sh"
+    "lib/scripts/ios-workflow/dynamic_config_injector.sh"
+    "lib/scripts/utils/gen_env_config.sh"
+    "lib/scripts/ios-workflow/generate_podfile.sh"
+)
+
+MISSING_SCRIPTS=()
+for script in "${REQUIRED_SCRIPTS[@]}"; do
+    if [[ ! -f "$script" ]]; then
+        log_error "❌ Required script not found: $script"
+        MISSING_SCRIPTS+=("$script")
+    else
+        log_success "✅ Found: $script"
+    fi
+done
+
+if [[ ${#MISSING_SCRIPTS[@]} -gt 0 ]]; then
+    log_error "❌ Missing required scripts: ${MISSING_SCRIPTS[*]}"
+    log_error "❌ Cannot proceed with iOS workflow"
+    exit 1
+fi
+
+log_success "✅ All required scripts are present"
+
 # Environment info
 echo "📊 Build Environment:"
 echo " - Flutter: $(flutter --version | head -1)"
@@ -52,9 +79,9 @@ flutter build ios --no-codesign --debug || {
 
 # Step 3: Fix Generated.xcconfig issue
 log_info "Fixing Generated.xcconfig configuration..."
-if [ -f "lib/scripts/ios-workflow/fix_generated_config.sh" ]; then
-    chmod +x lib/scripts/ios-workflow/fix_generated_config.sh
-    if ./lib/scripts/ios-workflow/fix_generated_config.sh; then
+if [ -f "lib/scripts/ios-workflow/robust_xcconfig_fix.sh" ]; then
+    chmod +x lib/scripts/ios-workflow/robust_xcconfig_fix.sh
+    if ./lib/scripts/ios-workflow/robust_xcconfig_fix.sh; then
         log_success "Generated.xcconfig fix completed"
     else
         log_error "Generated.xcconfig fix failed"
@@ -62,6 +89,8 @@ if [ -f "lib/scripts/ios-workflow/fix_generated_config.sh" ]; then
     fi
 else
     log_error "Generated.xcconfig fix script not found"
+    log_error "Available xcconfig scripts:"
+    ls -la lib/scripts/ios-workflow/*xcconfig*.sh 2>/dev/null || log_error "No xcconfig scripts found"
     exit 1
 fi
 

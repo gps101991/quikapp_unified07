@@ -59,9 +59,9 @@ flutter build ios --no-codesign --debug || {
 
 # Fix Generated.xcconfig issue
 log_info "Fixing Generated.xcconfig configuration..."
-if [ -f "lib/scripts/ios-workflow/fix_generated_config.sh" ]; then
-    chmod +x lib/scripts/ios-workflow/fix_generated_config.sh
-    if ./lib/scripts/ios-workflow/fix_generated_config.sh; then
+if [ -f "lib/scripts/ios-workflow/robust_xcconfig_fix.sh" ]; then
+    chmod +x lib/scripts/ios-workflow/robust_xcconfig_fix.sh
+    if ./lib/scripts/ios-workflow/robust_xcconfig_fix.sh; then
         log_success "Generated.xcconfig fix completed"
     else
         log_error "Generated.xcconfig fix failed"
