@@ -123,6 +123,10 @@ target 'Runner' do
   use_modular_headers!
 
   flutter_install_all_ios_pods File.dirname(File.realpath(__FILE__))
+  
+  # Firebase dependencies for push notifications
+  pod 'Firebase/Core'
+  pod 'Firebase/Messaging'
 end
 
 post_install do |installer|

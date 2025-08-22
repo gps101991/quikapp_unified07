@@ -184,32 +184,23 @@ log_info "🔧 Ensuring Podfile has Firebase dependencies..."
 
 if [[ -f "ios/Podfile" ]]; then
     # Check if Firebase dependencies are present
-    if ! grep -q "pod 'Firebase/Core'" ios/Podfile; then
-        log_info "📝 Adding Firebase/Core dependency to Podfile..."
-        echo "" >> ios/Podfile
-        echo "# Firebase dependencies for push notifications" >> ios/Podfile
-        echo "pod 'Firebase/Core'" >> ios/Podfile
-        log_success "✅ Added Firebase/Core dependency"
-    else
+    if grep -q "pod 'Firebase/Core'" ios/Podfile; then
         log_info "ℹ️ Firebase/Core dependency already present"
+    else
+        log_warning "⚠️ Firebase/Core dependency not found - this should be added by generate_podfile.sh"
     fi
     
-    if ! grep -q "pod 'Firebase/Messaging'" ios/Podfile; then
-        log_info "📝 Adding Firebase/Messaging dependency to Podfile..."
-        echo "pod 'Firebase/Messaging'" >> ios/Podfile
-        log_success "✅ Added Firebase/Messaging dependency"
-    else
+    if grep -q "pod 'Firebase/Messaging'" ios/Podfile; then
         log_info "ℹ️ Firebase/Messaging dependency already present"
+    else
+        log_warning "⚠️ Firebase/Messaging dependency not found - this should be added by generate_podfile.sh"
     fi
     
     # Ensure use_modular_headers! is present (important for Firebase)
-    if ! grep -q "use_modular_headers!" ios/Podfile; then
-        log_info "📝 Adding use_modular_headers! to Podfile..."
-        sed -i.bak 's/use_frameworks!/use_frameworks!\n  use_modular_headers!/' ios/Podfile
-        rm -f ios/Podfile.bak 2>/dev/null || true
-        log_success "✅ Added use_modular_headers! to Podfile"
-    else
+    if grep -q "use_modular_headers!" ios/Podfile; then
         log_info "ℹ️ use_modular_headers! already present"
+    else
+        log_warning "⚠️ use_modular_headers! not found - this should be added by generate_podfile.sh"
     fi
 else
     log_warning "⚠️ Podfile not found, cannot configure Firebase dependencies"

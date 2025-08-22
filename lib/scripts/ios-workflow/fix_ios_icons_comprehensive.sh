@@ -151,10 +151,10 @@ if [[ -f "$CONTENTS_JSON" ]]; then
       "size" : "76x76"
     },
     {
-      "filename" : "Icon-App-83.5x83.5@2x.png",
+      "filename" : "Icon-App-87x87@2x.png",
       "idiom" : "ipad",
       "scale" : "2x",
-      "size" : "83.5x83.5"
+      "size" : "87x87"
     },
     {
       "filename" : "Icon-App-1024x1024@1x.png",
@@ -222,7 +222,7 @@ if command -v sips > /dev/null 2>&1; then
     # iPad icons
     sips -z 76 76 "$SOURCE_ICON" --out "$ICON_DIR/Icon-App-76x76@1x.png" 2>/dev/null || log_warning "Failed to generate 76x76@1x"
     sips -z 152 152 "$SOURCE_ICON" --out "$ICON_DIR/Icon-App-76x76@2x.png" 2>/dev/null || log_warning "Failed to generate 76x76@2x"
-    sips -z 167 167 "$SOURCE_ICON" --out "$ICON_DIR/Icon-App-83.5x83.5@2x.png" 2>/dev/null || log_warning "Failed to generate 83.5x83.5@2x"
+    sips -z 174 174 "$SOURCE_ICON" --out "$ICON_DIR/Icon-App-87x87@2x.png" 2>/dev/null || log_warning "Failed to generate 87x87@2x"
     
     # App Store icon (critical)
     sips -z 1024 1024 "$SOURCE_ICON" --out "$ICON_DIR/Icon-App-1024x1024@1x.png" 2>/dev/null || log_warning "Failed to generate 1024x1024@1x"
@@ -287,7 +287,7 @@ log_info "🔧 Step 6: Verifying icon generation..."
 REQUIRED_ICONS=(
     "Icon-App-60x60@2x.png:120x120"
     "Icon-App-76x76@2x.png:152x152"
-    "Icon-App-83.5x83.5@2x.png:167x167"
+    "Icon-App-87x87@2x.png:174x174"
     "Icon-App-1024x1024@1x.png:1024x1024"
 )
 
