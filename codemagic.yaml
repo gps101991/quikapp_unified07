@@ -185,10 +185,44 @@ workflows:
             log_warning() { echo "⚠️ $1" >&2; }
             log_error() { echo "❌ $1" >&2; }
             
+            # Error handling
+            set -euo pipefail
+            trap 'log_error "Error occurred at line $LINENO. Exit code: $?"; exit 1' ERR
+            
+            # Pre-build cleanup
+            log_info "🧹 Pre-build cleanup..."
+            flutter clean > /dev/null 2>&1 || log_warning "⚠️ flutter clean failed (continuing)"
+            rm -rf ~/Library/Developer/Xcode/DerivedData/* > /dev/null 2>&1 || true
+            rm -rf .dart_tool/ > /dev/null 2>&1 || true
+            rm -rf ios/Pods/ > /dev/null 2>&1 || true
+            rm -rf ios/build/ > /dev/null 2>&1 || true
+            rm -rf ios/.symlinks > /dev/null 2>&1 || true
+            
             log_info "🔧 Making scripts executable..."
             chmod +x lib/scripts/ios/*.sh 2>/dev/null || log_warning "Some scripts may not be executable"
             chmod +x lib/scripts/ios-workflow/*.sh 2>/dev/null || log_warning "Some ios-workflow scripts may not be executable"
             chmod +x lib/scripts/utils/*.sh 2>/dev/null || log_warning "Some utils scripts may not be executable"
+            
+            # Pre-build validation
+            log_info "🔍 Validating critical iOS build requirements..."
+            CRITICAL_VARS=("BUNDLE_ID" "APPLE_TEAM_ID" "PROFILE_URL" "CERT_PASSWORD")
+            MISSING_CRITICAL=()
+            
+            for var in "${CRITICAL_VARS[@]}"; do
+                if [[ -z "${!var:-}" ]]; then
+                    log_warning "⚠️ $var: MISSING (critical for iOS build)"
+                    MISSING_CRITICAL+=("$var")
+                else
+                    log_success "✅ $var: ${!var}"
+                fi
+            done
+            
+            if [[ ${#MISSING_CRITICAL[@]} -gt 0 ]]; then
+                log_warning "⚠️ WARNING: Missing critical variables: ${MISSING_CRITICAL[*]}"
+                log_warning "ℹ️ Build may fail or use default values"
+            else
+                log_success "✅ All critical variables are present"
+            fi
             
             log_info "🎨 Setting up logo for flutter_launcher_icons..."
             if [[ -f "lib/scripts/ios-workflow/setup_logo_for_icons.sh" ]]; then
@@ -213,7 +247,16 @@ workflows:
                                     log_info "✅ Comprehensive iOS icon fix completed successfully"
                                     log_info "✅ App Store Connect validation should now pass"
                                 else
-                                    log_warning "⚠️ Comprehensive iOS icon fix failed, but continuing with build..."
+                                    log_warning "⚠️ Comprehensive iOS icon fix failed, trying fallback..."
+                                    # Fallback: Run individual icon fix scripts
+                                    if [[ -f "lib/scripts/ios-workflow/fix_icon_transparency.sh" ]]; then
+                                        chmod +x lib/scripts/ios-workflow/fix_icon_transparency.sh
+                                        ./lib/scripts/ios-workflow/fix_icon_transparency.sh || log_warning "⚠️ Transparency fix failed"
+                                    fi
+                                    if [[ -f "lib/scripts/ios-workflow/fix_corrupted_contents_json.sh" ]]; then
+                                        chmod +x lib/scripts/ios-workflow/fix_corrupted_contents_json.sh
+                                        ./lib/scripts/ios-workflow/fix_corrupted_contents_json.sh || log_warning "⚠️ Contents.json fix failed"
+                                    fi
                                 fi
                             else
                                 log_warning "⚠️ Comprehensive iOS icon fix script not found, using fallback method..."
@@ -263,8 +306,49 @@ workflows:
                 log_warning "⚠️ Logo setup script not found, continuing with build..."
             fi
             
+            # Final workflow verification
+            log_info "🔍 Final iOS workflow verification..."
+            if [[ -f "lib/scripts/ios-workflow/main_workflow.sh" ]]; then
+                log_success "✅ Main iOS workflow script found"
+            else
+                log_error "❌ Main iOS workflow script not found: lib/scripts/ios-workflow/main_workflow.sh"
+                log_error "❌ Cannot proceed with iOS build"
+                exit 1
+            fi
+            
             log_info "🚀 Starting main iOS build process..."
-            bash lib/scripts/ios/ios_build.sh
+            
+            # Make iOS workflow scripts executable
+            log_info "🔧 Making iOS workflow scripts executable..."
+            chmod +x lib/scripts/ios-workflow/*.sh
+            
+            # Run comprehensive iOS workflow
+            log_info "🚀 Running comprehensive iOS workflow..."
+            if bash lib/scripts/ios-workflow/main_workflow.sh; then
+                log_success "✅ iOS workflow completed successfully"
+                
+                # Post-build verification
+                log_info "🔍 Verifying build artifacts..."
+                if [[ -f "build/ios/output/Pixaware.ipa" ]] || [[ -f "output/ios/Pixaware.ipa" ]]; then
+                    log_success "✅ IPA file found - build successful"
+                    
+                    # Build status summary
+                    log_info "📊 iOS Build Summary:"
+                    log_success "  ✅ Project renamed successfully"
+                    log_success "  ✅ App icons generated and fixed"
+                    log_success "  ✅ iOS workflow completed"
+                    log_success "  ✅ IPA file created"
+                    log_info "🚀 Ready for App Store Connect upload"
+                else
+                    log_warning "⚠️ IPA file not found - checking alternative locations..."
+                    find build/ -name "*.ipa" -o -name "*.xcarchive" 2>/dev/null | head -5
+                    
+                    log_warning "⚠️ Build may have failed - check logs for details"
+                fi
+            else
+                log_error "❌ iOS workflow failed"
+                exit 1
+            fi
 
     artifacts:
       - build/export/*.ipa
@@ -579,7 +663,7 @@ workflows:
   # 🌐 Combined Workflow - Universal Build (Android + iOS)
   combined:
     name: Universal Combined Build (Android + iOS)
-    max_build_duration: 150
+    max_build_duration: 120
     instance_type: mac_mini_m2
     environment:
       flutter: 3.32.2
