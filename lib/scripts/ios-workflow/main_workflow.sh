@@ -604,6 +604,19 @@ run_cocoapods_commands() {
     # Simple pod install (based on improved_ios_workflow.sh)
     if pod install > /dev/null 2>&1; then
         log_success "✅ pod install completed successfully"
+        
+        # Fix Pod code signing issues after successful pod install
+        log_info "🔧 Fixing Pod code signing issues..."
+        if [ -f "lib/scripts/ios-workflow/fix_pod_code_signing.sh" ]; then
+            chmod +x lib/scripts/ios-workflow/fix_pod_code_signing.sh
+            if ./lib/scripts/ios-workflow/fix_pod_code_signing.sh; then
+                log_success "✅ Pod code signing issues fixed"
+            else
+                log_warning "⚠️ Pod code signing fix failed, but continuing..."
+            fi
+        else
+            log_warning "⚠️ Pod code signing fix script not found, skipping..."
+        fi
     else
         log_error "❌ pod install failed"
         popd > /dev/null
@@ -635,6 +648,10 @@ PROVISIONING_PROFILE_SPECIFIER = $UUID
 CODE_SIGN_IDENTITY = iPhone Distribution
 PRODUCT_BUNDLE_IDENTIFIER = $BUNDLE_ID
 EOF
+
+# Note: The release.xcconfig settings will be applied to the main target
+# Pod targets will have their code signing settings overridden in the Podfile post_install hook
+log_info "ℹ️ Code signing settings configured - Pod targets will use automatic signing"
 
 log_info "✅ release.xcconfig updated:"
 cat "$XC_CONFIG_PATH"
