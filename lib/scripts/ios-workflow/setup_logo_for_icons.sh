@@ -60,7 +60,7 @@ if command -v sips > /dev/null 2>&1; then
     LOGO_SIZE=$(sips -g pixelWidth -g pixelHeight "$ASSETS_DIR/logo.png" 2>/dev/null | grep -E "(pixelWidth|pixelHeight)" | awk '{print $2}' | tr '\n' 'x' | sed 's/x$//')
     if [[ -n "$LOGO_SIZE" ]]; then
         LOGO_WIDTH=$(echo "$LOGO_SIZE" | cut -d'x' -f1)
-        LOGO_HEIGHT=$(echo "$LOGO_SIZE" | cut -d' ' -f2)
+        LOGO_HEIGHT=$(echo "$LOGO_SIZE" | cut -d'x' -f2)
         
         log_info "Logo dimensions: ${LOGO_WIDTH}x${LOGO_HEIGHT}"
         

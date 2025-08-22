@@ -285,8 +285,8 @@ for i in "${!icon_sizes[@]}"; do
     filename="${icon_filenames[$i]}"
     
     # Try up to 3 times to generate each icon
-    local retry_count=0
-    local max_retries=3
+    retry_count=0
+    max_retries=3
     
     while [ $retry_count -lt $max_retries ]; do
         if generate_icon "$size" "$filename"; then

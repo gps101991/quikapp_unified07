@@ -108,6 +108,7 @@ icon_sizes=(
     "76x76@2x"
     "83.5x83.5@2x"
     "1024x1024@1x"
+    "76x76@1x"
 )
 
 icon_filenames=(
@@ -129,6 +130,7 @@ icon_filenames=(
     "Icon-App-76x76@2x.png"
     "Icon-App-83.5x83.5@2x.png"
     "Icon-App-1024x1024@1x.png"
+    "Icon-App-76x76@1x.png"
 )
 
 # Create all required icons
