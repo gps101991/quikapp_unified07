@@ -116,7 +116,6 @@ else
     log_success "✅ Fresh logo downloaded successfully"
     log_info "Logo file size: $(ls -lh assets/images/logo.png | awk '{print $5}')"
 fi
-fi
 
 # Verify the downloaded image is valid
 if command -v file >/dev/null 2>&1; then
@@ -184,26 +183,49 @@ fi
 log_info "Generating iOS app icons..."
 
 # iOS icon sizes with proper naming - including ALL required sizes for App Store
-declare -A icon_sizes=(
-    ["20x20@1x"]="Icon-App-20x20@1x.png"
-    ["20x20@2x"]="Icon-App-20x20@2x.png"
-    ["20x20@3x"]="Icon-App-20x20@3x.png"
-    ["29x29@1x"]="Icon-App-29x29@1x.png"
-    ["29x29@2x"]="Icon-App-29x29@2x.png"
-    ["29x29@3x"]="Icon-App-29x29@3x.png"
-    ["40x40@1x"]="Icon-App-40x40@1x.png"
-    ["40x40@2x"]="Icon-App-40x40@2x.png"
-    ["40x40@3x"]="Icon-App-40x40@3x.png"
-    ["60x60@2x"]="Icon-App-60x60@2x.png"
-    ["60x60@3x"]="Icon-App-60x60@3x.png"
-    ["76x76@1x"]="Icon-App-76x76@1x.png"
-    ["76x76@2x"]="Icon-App-76x76@2x.png"
-    ["83.5x83.5@2x"]="Icon-App-83.5x83.5@2x.png"
-    ["1024x1024@1x"]="Icon-App-1024x1024@1x.png"
+# Using parallel arrays to avoid associative array issues
+icon_sizes=(
+    "20x20@1x"
+    "20x20@2x"
+    "20x20@3x"
+    "29x29@1x"
+    "29x29@2x"
+    "29x29@3x"
+    "40x40@1x"
+    "40x40@2x"
+    "40x40@3x"
+    "60x60@2x"
+    "60x60@3x"
+    "76x76@1x"
+    "76x76@2x"
+    "83.5x83.5@2x"
+    "1024x1024@1x"
     # Additional required sizes for App Store validation
-    ["120x120@1x"]="Icon-App-120x120@1x.png"
-    ["152x152@1x"]="Icon-App-152x152@1x.png"
-    ["167x167@1x"]="Icon-App-167x167@1x.png"
+    "120x120@1x"
+    "152x152@1x"
+    "167x167@1x"
+)
+
+icon_filenames=(
+    "Icon-App-20x20@1x.png"
+    "Icon-App-20x20@2x.png"
+    "Icon-App-20x20@3x.png"
+    "Icon-App-29x29@1x.png"
+    "Icon-App-29x29@2x.png"
+    "Icon-App-29x29@3x.png"
+    "Icon-App-40x40@1x.png"
+    "Icon-App-40x40@2x"
+    "Icon-App-40x40@3x.png"
+    "Icon-App-60x60@2x.png"
+    "Icon-App-60x60@3x.png"
+    "Icon-App-76x76@1x.png"
+    "Icon-App-76x76@2x.png"
+    "Icon-App-83.5x83.5@2x.png"
+    "Icon-App-1024x1024@1x.png"
+    # Additional required sizes for App Store validation
+    "Icon-App-120x120@1x.png"
+    "Icon-App-152x152@1x.png"
+    "Icon-App-167x167@1x.png"
 )
 
 # Function to generate icon with multiple fallback methods
@@ -258,8 +280,9 @@ generate_icon() {
 }
 
 # Generate each icon size with retry logic
-for size in "${!icon_sizes[@]}"; do
-    filename="${icon_sizes[$size]}"
+for i in "${!icon_sizes[@]}"; do
+    size="${icon_sizes[$i]}"
+    filename="${icon_filenames[$i]}"
     
     # Try up to 3 times to generate each icon
     local retry_count=0

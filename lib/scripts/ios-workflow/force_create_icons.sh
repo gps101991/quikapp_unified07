@@ -88,30 +88,53 @@ create_simple_icon() {
 }
 
 # Required icon sizes for App Store validation
-declare -A required_sizes=(
-    ["120x120@1x"]="Icon-App-120x120@1x.png"
-    ["152x152@1x"]="Icon-App-152x152@1x.png"
-    ["167x167@1x"]="Icon-App-167x167@1x.png"
-    ["20x20@1x"]="Icon-App-20x20@1x.png"
-    ["20x20@2x"]="Icon-App-20x20@2x.png"
-    ["20x20@3x"]="Icon-App-20x20@3x.png"
-    ["29x29@1x"]="Icon-App-29x29@1x.png"
-    ["29x29@2x"]="Icon-App-29x29@2x.png"
-    ["29x29@3x"]="Icon-App-29x29@3x.png"
-    ["40x40@1x"]="Icon-App-40x40@1x.png"
-    ["40x40@2x"]="Icon-App-40x40@2x.png"
-    ["40x40@3x"]="Icon-App-40x40@3x.png"
-    ["60x60@2x"]="Icon-App-60x60@2x.png"
-    ["60x60@3x"]="Icon-App-60x60@3x.png"
-    ["76x76@1x"]="Icon-App-76x76@1x.png"
-    ["76x76@2x"]="Icon-App-76x76@2x.png"
-    ["83.5x83.5@2x"]="Icon-App-83.5x83.5@2x.png"
-    ["1024x1024@1x"]="Icon-App-1024x1024@1x.png"
+# Using parallel arrays to avoid associative array issues
+icon_sizes=(
+    "120x120@1x"
+    "152x152@1x"
+    "167x167@1x"
+    "20x20@1x"
+    "20x20@2x"
+    "20x20@3x"
+    "29x29@1x"
+    "29x29@2x"
+    "29x29@3x"
+    "40x40@1x"
+    "40x40@2x"
+    "40x40@3x"
+    "60x60@2x"
+    "60x60@3x"
+    "76x76@1x"
+    "76x76@2x"
+    "83.5x83.5@2x"
+    "1024x1024@1x"
+)
+
+icon_filenames=(
+    "Icon-App-120x120@1x.png"
+    "Icon-App-152x152@1x.png"
+    "Icon-App-167x167@1x.png"
+    "Icon-App-20x20@1x.png"
+    "Icon-App-20x20@2x.png"
+    "Icon-App-20x20@3x.png"
+    "Icon-App-29x29@1x.png"
+    "Icon-App-29x29@2x.png"
+    "Icon-App-29x29@3x.png"
+    "Icon-App-40x40@1x.png"
+    "Icon-App-40x40@2x.png"
+    "Icon-App-40x40@3x.png"
+    "Icon-App-60x60@2x.png"
+    "Icon-App-60x60@3x.png"
+    "Icon-App-76x76@1x.png"
+    "Icon-App-76x76@2x.png"
+    "Icon-App-83.5x83.5@2x.png"
+    "Icon-App-1024x1024@1x.png"
 )
 
 # Create all required icons
-for size in "${!required_sizes[@]}"; do
-    filename="${required_sizes[$size]}"
+for i in "${!icon_sizes[@]}"; do
+    size="${icon_sizes[$i]}"
+    filename="${icon_filenames[$i]}"
     if create_simple_icon "$size" "$filename"; then
         log_success "Created $filename"
     else
