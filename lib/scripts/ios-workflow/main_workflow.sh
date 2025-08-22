@@ -115,6 +115,13 @@ if [ -f "lib/scripts/utils/gen_env_config.sh" ]; then
     chmod +x lib/scripts/utils/gen_env_config.sh
     if ./lib/scripts/utils/gen_env_config.sh; then
         log_success "✅ Environment configuration generated successfully"
+    else
+        log_error "❌ Environment configuration generation failed"
+        exit 1
+    fi
+else
+    log_warning "⚠️ Environment configuration script not found, skipping"
+fi
 
 # Step 6: Firebase Setup (CRITICAL: Must be before CocoaPods)
 echo "🔥 Step 6: Firebase Setup and Configuration..."
@@ -924,3 +931,4 @@ log_info "  📦 Archive: build/ios/archive/Runner.xcarchive"
 log_info "  📋 Config: ios/ExportOptions.plist"
 
 # Final success exit
+exit 0
