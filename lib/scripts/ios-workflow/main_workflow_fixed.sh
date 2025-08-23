@@ -44,6 +44,27 @@ fi
 
 log_success "✅ All required scripts are present"
 
+# Validate critical environment variables
+log_info "🔍 Validating critical environment variables..."
+CRITICAL_VARS=("BUNDLE_ID" "APPLE_TEAM_ID" "PROFILE_URL" "CERT_PASSWORD")
+MISSING_CRITICAL=()
+
+for var in "${CRITICAL_VARS[@]}"; do
+    if [[ -z "${!var:-}" ]]; then
+        log_warning "⚠️ $var: MISSING (critical for iOS build)"
+        MISSING_CRITICAL+=("$var")
+    else
+        log_success "✅ $var: ${!var}"
+    fi
+done
+
+if [[ ${#MISSING_CRITICAL[@]} -gt 0 ]]; then
+    log_warning "⚠️ WARNING: Missing critical variables: ${MISSING_CRITICAL[*]}"
+    log_warning "ℹ️ Build may fail or use default values"
+else
+    log_success "✅ All critical variables are present"
+fi
+
 # Environment info
 echo "📊 Build Environment:"
 echo " - Flutter: $(flutter --version | head -1)"
@@ -201,8 +222,8 @@ if [[ -n "$PROFILE_URL" ]]; then
     if [[ -n "$BUNDLE_ID_FROM_PROFILE" ]]; then
         echo "Bundle Identifier from profile: $BUNDLE_ID_FROM_PROFILE"
         
-        # Use bundle ID from profile if BUNDLE_ID is not set or is default
-        if [[ -z "$BUNDLE_ID" || "$BUNDLE_ID" == "$DEFAULT_BUNDLE_ID" ]]; then
+        # Use bundle ID from profile if BUNDLE_ID is not set
+        if [[ -z "$BUNDLE_ID" ]]; then
             BUNDLE_ID="$BUNDLE_ID_FROM_PROFILE"
             log_info "Using bundle ID from provisioning profile: $BUNDLE_ID"
         else
@@ -233,7 +254,7 @@ elif [[ -n "$CERT_CER_URL" && -n "$CERT_KEY_URL" ]]; then
     log_success "Downloaded CER and KEY files"
     
     # Generate P12 from CER/KEY
-    openssl pkcs12 -export -in /tmp/certificate.cer -inkey /tmp/certificate.key -out /tmp/certificate.p12 -passout pass:"${CERT_PASSWORD:-quikapp2025}"
+    openssl pkcs12 -export -in /tmp/certificate.cer -inkey /tmp/certificate.key -out /tmp/certificate.p12 -passout pass:"${CERT_PASSWORD:-$CERT_PASSWORD}"
     log_success "Generated P12 from CER/KEY files"
     
     # Add certificate to keychain using Codemagic CLI
@@ -267,14 +288,16 @@ fi
 if [[ -n "$BUNDLE_ID" ]]; then
     log_info "Updating bundle identifier to: $BUNDLE_ID"
     
-    # List of possible default bundle IDs to replace
-    DEFAULT_BUNDLE_IDS=("$DEFAULT_BUNDLE_ID" "$BUNDLE_ID")
+    # List of possible default bundle IDs to replace (common Flutter defaults)
+    DEFAULT_BUNDLE_IDS=("com.example.flutter" "com.example.app" "com.example.quikapp" "com.example.quikappflutter")
     
     for OLD_BUNDLE_ID in "${DEFAULT_BUNDLE_IDS[@]}"; do
-        log_info "Replacing $OLD_BUNDLE_ID with $BUNDLE_ID"
-        find ios -name "project.pbxproj" -exec sed -i '' "s/$OLD_BUNDLE_ID/$BUNDLE_ID/g" {} \;
-        find ios -name "Info.plist" -exec sed -i '' "s/$OLD_BUNDLE_ID/$BUNDLE_ID/g" {} \;
-        find ios -name "*.entitlements" -exec sed -i '' "s/$OLD_BUNDLE_ID/$BUNDLE_ID/g" {} \;
+        if [[ "$OLD_BUNDLE_ID" != "$BUNDLE_ID" ]]; then
+            log_info "Replacing $OLD_BUNDLE_ID with $BUNDLE_ID"
+            find ios -name "project.pbxproj" -exec sed -i '' "s/$OLD_BUNDLE_ID/$BUNDLE_ID/g" {} \;
+            find ios -name "Info.plist" -exec sed -i '' "s/$OLD_BUNDLE_ID/$BUNDLE_ID/g" {} \;
+            find ios -name "*.entitlements" -exec sed -i '' "s/$OLD_BUNDLE_ID/$BUNDLE_ID/g" {} \;
+        fi
     done
     
     # Also update the Info.plist directly
@@ -293,7 +316,19 @@ if [[ -n "$BUNDLE_ID" ]]; then
     fi
     
     log_success "Bundle Identifier updated to $BUNDLE_ID"
+else
+    log_error "❌ BUNDLE_ID is not set. Cannot proceed with iOS build."
+    log_info "Please ensure BUNDLE_ID environment variable is set in Codemagic."
+    exit 1
 fi
+
+# Validate that bundle ID is now properly set
+if [[ -z "$BUNDLE_ID" ]]; then
+    log_error "❌ BUNDLE_ID is still not set after all attempts. Cannot proceed."
+    exit 1
+fi
+
+log_success "✅ Bundle ID validation passed: $BUNDLE_ID"
 
 # Step 11: App icon installation and fix (CRITICAL for App Store validation)
 echo "🖼️ Step 11: App Icon Installation and Fix..."
