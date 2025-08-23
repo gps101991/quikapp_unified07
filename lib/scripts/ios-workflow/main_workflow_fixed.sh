@@ -522,6 +522,12 @@ run_cocoapods_commands() {
         rm -rf ios/Pods
         log_info "🗑️ Removed ios/Pods directory"
     fi
+    
+    # Remove all Pod-related files to ensure clean regeneration
+    rm -rf ios/Podfile.lock
+    rm -rf ios/.symlinks
+    rm -rf ios/Pods
+    log_info "🧹 Cleaned all Pod-related files"
 
     # Enter ios directory
     pushd ios > /dev/null || { log_error "Failed to enter ios directory"; return 1; }
@@ -531,9 +537,45 @@ run_cocoapods_commands() {
     log_info "Podfile contents:"
     cat Podfile
 
-    # Simple pod install
-    if pod install > /dev/null 2>&1; then
+    # Force pod install with repo update to ensure latest Podfile is used
+    log_info "🔄 Running: pod install --repo-update"
+    if pod install --repo-update; then
         log_success "✅ pod install completed successfully"
+        
+        # Verify Pod settings were applied correctly
+        log_info "🔍 Verifying Pod settings..."
+        if [ -d "Pods" ]; then
+            log_info "✅ Pods directory created successfully"
+            
+            # Check if any Pod targets still have provisioning profile references
+            PROFILE_REFS=$(find Pods -name "*.pbxproj" -exec grep -l "PROVISIONING_PROFILE" {} \; 2>/dev/null || true)
+            if [ -n "$PROFILE_REFS" ]; then
+                log_warning "⚠️ Found Pod targets with provisioning profile references:"
+                echo "$PROFILE_REFS"
+                            log_info "These should be automatically resolved by the Podfile post_install hook"
+            
+            # Force re-run post_install hook if provisioning profiles are found
+            if [ -n "$PROFILE_REFS" ]; then
+                log_info "🔄 Forcing post_install hook to run again..."
+                if pod install --no-repo-update; then
+                    log_success "✅ Post_install hook re-run successfully"
+                else
+                    log_warning "⚠️ Post_install hook re-run failed"
+                fi
+            fi
+        else
+            log_success "✅ No provisioning profile references found in Pods"
+        fi
+            
+            # Check deployment targets
+            DEPLOYMENT_TARGETS=$(find Pods -name "*.pbxproj" -exec grep -h "IPHONEOS_DEPLOYMENT_TARGET" {} \; 2>/dev/null | sort | uniq || true)
+            if [ -n "$DEPLOYMENT_TARGETS" ]; then
+                log_info "Current Pod deployment targets:"
+                echo "$DEPLOYMENT_TARGETS"
+            fi
+        else
+            log_error "❌ Pods directory not created"
+        fi
         
         # Fix Pod code signing issues after successful pod install
         log_info "🔧 Fixing Pod code signing issues..."
