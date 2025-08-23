@@ -1,4 +1,4 @@
-name: quikapp_unified6
+name: pixaware
 description: "A new Flutter project."
 publish_to: "none"
 version: 1.0.7+43
@@ -34,6 +34,7 @@ dev_dependencies:
     sdk: flutter
   flutter_lints: ^4.0.0
   flutter_launcher_icons: ^0.14.4
+  change_app_package_name: ^1.5.0
 
 flutter_launcher_icons:
   android: true
