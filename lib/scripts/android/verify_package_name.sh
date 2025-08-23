@@ -7,7 +7,7 @@ set -euo pipefail
 log() { echo "[$(date +'%Y-%m-%d %H:%M:%S')] [PKG_VERIFY] $1"; }
 
 # Expected package name from environment
-EXPECTED_PACKAGE_NAME="${PKG_NAME:-com.example.quikapptest06}"
+EXPECTED_PACKAGE_NAME="${PKG_NAME:-$PKG_NAME}"
 
 log "🔍 Starting APK package name verification..."
 log "📦 Expected package name: $EXPECTED_PACKAGE_NAME"

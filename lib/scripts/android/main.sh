@@ -125,7 +125,7 @@ plugins {
 }
 
 android {
-    namespace = "${PKG_NAME:-com.example.quikapptest06}"
+    namespace = "${PKG_NAME:-$PKG_NAME}"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = "27.0.12077973"
 
@@ -150,7 +150,7 @@ android {
 
     defaultConfig {
         // Application ID will be updated by customization script
-        applicationId = "${PKG_NAME:-com.example.quikapptest06}"
+        applicationId = "${PKG_NAME:-$PKG_NAME}"
         minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode

@@ -93,7 +93,7 @@ verify_package_names() {
         current_version=$(grep -o '^version: [^+]*' pubspec.yaml | cut -d' ' -f2)
         log "   Current version: $current_version"
         
-        expected_version="${VERSION_NAME:-1.0.0}"
+        expected_version="${VERSION_NAME:-$VERSION_NAME}"
         if [ "$current_version" = "$expected_version" ]; then
             log "✅ pubspec.yaml version matches VERSION_NAME"
         else

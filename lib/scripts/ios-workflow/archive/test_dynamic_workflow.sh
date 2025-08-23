@@ -4,11 +4,11 @@
 # Sets default environment variables for testing
 
 # Set default environment variables for testing
-export BUNDLE_ID="com.test.app"
+export BUNDLE_ID="$BUNDLE_ID"
 export APP_NAME="Test App"
-export VERSION_NAME="1.0.0"
+export VERSION_NAME="$VERSION_NAME"
 export VERSION_CODE="1"
-export APPLE_TEAM_ID="TEST123"
+export APPLE_TEAM_ID="$APPLE_TEAM_ID"
 export CERT_PASSWORD="testpass"
 export PROFILE_URL="https://example.com/profile.mobileprovision"
 export PROJECT_ID="test-project-id"
@@ -19,7 +19,7 @@ export USER_NAME="testuser"
 export EMAIL_ID="test@example.com"
 export BRANCH="main"
 export WORKFLOW_ID="ios-workflow"
-export PKG_NAME="com.test.app"
+export PKG_NAME="$PKG_NAME"
 export PUSH_NOTIFY="false"
 export IS_CHATBOT="false"
 export IS_DOMAIN_URL="false"

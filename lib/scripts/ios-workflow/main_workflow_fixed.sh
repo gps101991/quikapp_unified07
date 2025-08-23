@@ -202,7 +202,7 @@ if [[ -n "$PROFILE_URL" ]]; then
         echo "Bundle Identifier from profile: $BUNDLE_ID_FROM_PROFILE"
         
         # Use bundle ID from profile if BUNDLE_ID is not set or is default
-        if [[ -z "$BUNDLE_ID" || "$BUNDLE_ID" == "com.example.sampleprojects.sampleProject" || "$BUNDLE_ID" == "com.test.app" ]]; then
+        if [[ -z "$BUNDLE_ID" || "$BUNDLE_ID" == "$DEFAULT_BUNDLE_ID" ]]; then
             BUNDLE_ID="$BUNDLE_ID_FROM_PROFILE"
             log_info "Using bundle ID from provisioning profile: $BUNDLE_ID"
         else
@@ -268,7 +268,7 @@ if [[ -n "$BUNDLE_ID" ]]; then
     log_info "Updating bundle identifier to: $BUNDLE_ID"
     
     # List of possible default bundle IDs to replace
-    DEFAULT_BUNDLE_IDS=("com.example.sampleprojects.sampleProject" "com.test.app" "com.example.quikapp" "com.example.quikappflutter")
+    DEFAULT_BUNDLE_IDS=("$DEFAULT_BUNDLE_ID" "$BUNDLE_ID")
     
     for OLD_BUNDLE_ID in "${DEFAULT_BUNDLE_IDS[@]}"; do
         log_info "Replacing $OLD_BUNDLE_ID with $BUNDLE_ID"

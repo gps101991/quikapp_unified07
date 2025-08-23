@@ -75,7 +75,7 @@ if [ -f "lib/scripts/utils/gen_env_config.sh" ]; then
         
         # Show generated config summary
         log "📋 Generated Config Summary:"
-        log "   App: ${APP_NAME:-QuikApp} v${VERSION_NAME:-1.0.0}"
+        log "   App: ${APP_NAME:-$APP_NAME} v${VERSION_NAME:-$VERSION_NAME}"
         log "   Workflow: ${WORKFLOW_ID:-unknown}"
         log "   Bundle ID: ${BUNDLE_ID:-not_set}"
         log "   Firebase: ${PUSH_NOTIFY:-false}"

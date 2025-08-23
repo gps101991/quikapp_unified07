@@ -7,11 +7,11 @@ set -euo pipefail
 log() { echo "[$(date +'%Y-%m-%d %H:%M:%S')] [PKG_UPDATE] $1"; }
 
 # Get the new package name from environment variable
-NEW_PACKAGE_NAME="${PKG_NAME:-com.example.quikapptest06}"
+NEW_PACKAGE_NAME="${PKG_NAME:-$PKG_NAME}"
 
 # Define possible old package names to replace
 OLD_PACKAGE_NAMES=(
-    "com.example.quikapptest06"
+    "$PKG_NAME"
     "com.example.myapp"
     "com.myapp.app"
     "com.mynewapp.app"

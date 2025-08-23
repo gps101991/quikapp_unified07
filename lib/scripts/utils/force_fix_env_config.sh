@@ -27,9 +27,9 @@ cat > lib/config/env_config.dart << 'EOF'
 class EnvConfig {
   // App Metadata
   static const String appId = "";
-  static const String versionName = "1.0.0";
+  static const String versionName = "$VERSION_NAME";
   static const int versionCode = 1;
-  static const String appName = "QuikApp";
+  static const String appName = "$APP_NAME";
   static const String orgName = "";
   static const String webUrl = "";
   static const String userName = "";

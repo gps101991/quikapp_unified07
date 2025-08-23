@@ -8,8 +8,8 @@ trap 'handle_error "Error occurred at line $LINENO"' ERR
 log "🔄 Starting Android Version Management and Package Conflict Resolution"
 
 # Get current environment variables
-PKG_NAME=${PKG_NAME:-"com.example.quikapptest06"}
-VERSION_NAME=${VERSION_NAME:-"1.0.0"}
+PKG_NAME=${PKG_NAME:-"$PKG_NAME"}
+VERSION_NAME=${VERSION_NAME:-"$VERSION_NAME"}
 VERSION_CODE=${VERSION_CODE:-"1"}
 BUILD_MODE=${BUILD_MODE:-"debug"}
 KEY_STORE_URL=${KEY_STORE_URL:-}

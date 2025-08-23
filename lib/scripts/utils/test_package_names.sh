@@ -9,22 +9,22 @@ test_package_names() {
     
     # Test cases for different workflows - ALL use same package name
     declare -A test_cases=(
-        ["android-free"]="com.example.quikapptest06"
-        ["android-paid"]="com.example.quikapptest06"
-        ["android-publish"]="com.example.quikapptest06"
-        ["combined"]="com.example.quikapptest06"
+        ["android-free"]="$PKG_NAME"
+["android-paid"]="$PKG_NAME"
+["android-publish"]="$PKG_NAME"
+["combined"]="$PKG_NAME"
     )
     
     # Test with different PKG_NAME values
     declare -A pkg_tests=(
         ["com.myapp.test"]="com.myapp.test"
         ["com.company.app"]="com.company.app"
-        ["com.example.quikapptest06"]="com.example.quikapptest06"
+        ["$PKG_NAME"]="$PKG_NAME"
     )
     
     log "📋 Test Configuration:"
-    log "   Base PKG_NAME: ${PKG_NAME:-com.example.quikapptest06}"
-    log "   VERSION_NAME: ${VERSION_NAME:-1.0.0}"
+    log "   Base PKG_NAME: ${PKG_NAME:-$PKG_NAME}"
+    log "   VERSION_NAME: ${VERSION_NAME:-$VERSION_NAME}"
     log "   VERSION_CODE: ${VERSION_CODE:-1}"
     log "   WORKFLOW_ID: ${WORKFLOW_ID:-unknown}"
     log "   🔥 All workflows use same package name for Firebase connectivity"
@@ -41,7 +41,7 @@ test_package_names() {
         log "   Current namespace: $current_namespace"
         
         # Check if package name matches expected - ALL workflows use same package name
-        expected_pkg="${PKG_NAME:-com.example.quikapptest06}"
+        expected_pkg="${PKG_NAME:-$PKG_NAME}"
         
         if [ "$current_app_id" = "$expected_pkg" ]; then
             log "✅ Package name correctly updated: $current_app_id"
@@ -93,7 +93,7 @@ test_package_names() {
         current_version=$(grep -o '^version: [^+]*' pubspec.yaml | cut -d' ' -f2)
         log "   Current version: $current_version"
         
-        expected_version="${VERSION_NAME:-1.0.0}"
+        expected_version="${VERSION_NAME:-$VERSION_NAME}"
         if [ "$current_version" = "$expected_version" ]; then
             log "✅ Version correctly updated: $current_version"
         else
@@ -115,7 +115,7 @@ test_package_names() {
         log "   Expected package: $expected_package"
         
         # Simulate what version_management.sh would do - ALL workflows use same package name
-        simulated_pkg="${PKG_NAME:-com.example.quikapptest06}"
+        simulated_pkg="${PKG_NAME:-$PKG_NAME}"
         
         log "   Simulated package: $simulated_pkg"
         

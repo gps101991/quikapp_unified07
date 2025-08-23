@@ -74,9 +74,9 @@ cat > lib/config/env_config.dart <<EOF
 class EnvConfig {
   // App Metadata
   static const String appId = "$(safe_env "APP_ID" "")";
-  static const String versionName = "$(safe_env "VERSION_NAME" "1.0.0")";
+  static const String versionName = "$(safe_env "VERSION_NAME" "$VERSION_NAME")";
   static const int versionCode = $(safe_int "VERSION_CODE" "1");
-  static const String appName = "$(safe_env "APP_NAME" "QuikApp")";
+  static const String appName = "$(safe_env "APP_NAME" "$APP_NAME")";
   static const String orgName = "$(safe_env "ORG_NAME" "")";
   static const String webUrl = "$(safe_env "WEB_URL" "")";
   static const String userName = "$(safe_env "USER_NAME" "")";
@@ -209,7 +209,7 @@ if [ -f "lib/config/env_config.dart" ]; then
     
     # Show config summary
     log "📋 Configuration Summary:"
-    log "   App: $(safe_env "APP_NAME" "QuikApp") v$(safe_env "VERSION_NAME" "1.0.0")"
+    log "   App: $(safe_env "APP_NAME" "$APP_NAME") v$(safe_env "VERSION_NAME" "$VERSION_NAME")"
     log "   Workflow: $(safe_env "WORKFLOW_ID" "unknown")"
     log "   Firebase: $(safe_bool "PUSH_NOTIFY" "false")"
     log "   Keystore: $([ -n "$(safe_env "KEY_STORE_URL" "")" ] && echo "true" || echo "false")"

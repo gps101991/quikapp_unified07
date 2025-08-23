@@ -81,10 +81,10 @@ generate_android_env_config() {
 
 class EnvConfig {
   // Core App Configuration
-  static const String appName = "${APP_NAME:-QuikApp}";
-  static const String versionName = "${VERSION_NAME:-1.0.0}";
+  static const String appName = "${APP_NAME:-$APP_NAME}";
+  static const String versionName = "${VERSION_NAME:-$VERSION_NAME}";
   static const int versionCode = ${VERSION_CODE:-1};
-  static const String packageName = "${PKG_NAME:-com.example.app}";
+  static const String packageName = "${PKG_NAME:-$PKG_NAME}";
   static const String workflowId = "${WORKFLOW_ID:-unknown}";
   
   // User & Organization
@@ -188,10 +188,10 @@ generate_ios_env_config() {
 
 class EnvConfig {
   // Core App Configuration
-  static const String appName = "${APP_NAME:-QuikApp}";
-  static const String versionName = "${VERSION_NAME:-1.0.0}";
+  static const String appName = "${APP_NAME:-$APP_NAME}";
+  static const String versionName = "${VERSION_NAME:-$VERSION_NAME}";
   static const int versionCode = ${VERSION_CODE:-1};
-  static const String bundleId = "${BUNDLE_ID:-com.example.app}";
+  static const String bundleId = "${BUNDLE_ID:-$BUNDLE_ID}";
   static const String workflowId = "${WORKFLOW_ID:-unknown}";
   
   // User & Organization
@@ -299,11 +299,11 @@ generate_combined_env_config() {
 
 class EnvConfig {
   // Core App Configuration
-  static const String appName = "${APP_NAME:-QuikApp}";
-  static const String versionName = "${VERSION_NAME:-1.0.0}";
+  static const String appName = "${APP_NAME:-$APP_NAME}";
+  static const String versionName = "${VERSION_NAME:-$VERSION_NAME}";
   static const int versionCode = ${VERSION_CODE:-1};
-  static const String packageName = "${PKG_NAME:-com.example.app}";
-  static const String bundleId = "${BUNDLE_ID:-com.example.app}";
+  static const String packageName = "${PKG_NAME:-$PKG_NAME}";
+  static const String bundleId = "${BUNDLE_ID:-$BUNDLE_ID}";
   static const String workflowId = "${WORKFLOW_ID:-unknown}";
   
   // User & Organization
@@ -478,7 +478,7 @@ generate_env_config() {
         
         # Show config summary
         log "📋 Configuration Summary:"
-        log "   App: ${APP_NAME:-QuikApp} v${VERSION_NAME:-1.0.0}"
+        log "   App: ${APP_NAME:-$APP_NAME} v${VERSION_NAME:-$VERSION_NAME}"
         log "   Workflow: ${WORKFLOW_ID:-unknown}"
         log "   Platform: $([ "$workflow_id" = "android-"* ] && echo "Android" || echo "iOS")"
         log "   Firebase: ${PUSH_NOTIFY:-false}"

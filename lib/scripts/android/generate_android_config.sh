@@ -8,8 +8,8 @@ trap 'handle_error "Error occurred at line $LINENO"' ERR
 log "🔄 Starting Dynamic Android Configuration Generation"
 
 # Get environment variables
-PKG_NAME=${PKG_NAME:-"com.example.quikapptest06"}
-VERSION_NAME=${VERSION_NAME:-"1.0.0"}
+PKG_NAME=${PKG_NAME:-"$PKG_NAME"}
+VERSION_NAME=${VERSION_NAME:-"$VERSION_NAME"}
 VERSION_CODE=${VERSION_CODE:-"1"}
 WORKFLOW_ID=${WORKFLOW_ID:-"android-free"}
 PUSH_NOTIFY=${PUSH_NOTIFY:-"false"}
