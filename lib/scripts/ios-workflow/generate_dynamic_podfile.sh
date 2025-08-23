@@ -45,6 +45,7 @@ log_info "📝 Generating fresh Podfile with ultra-aggressive fixes..."
 cat << 'EOF' > Podfile
 # Generated Podfile with Ultra-Aggressive Fixes
 # This Podfile is dynamically generated to ensure all fixes are applied
+# Note: Cleanup is handled by the iOS workflow script before pod install
 
 platform :ios, '13.0'
 inhibit_all_warnings!
@@ -80,29 +81,10 @@ require File.expand_path(File.join('packages', 'flutter_tools', 'bin', 'podhelpe
 
 flutter_ios_podfile_setup
 
-# Pre-install hook to clean up any existing problematic Pod settings
+# Pre-install hook to apply code signing fixes (cleanup moved to workflow script)
 pre_install do |installer|
-  puts "🧹 Pre-install: Cleaning up any existing problematic Pod settings..."
-  
-  # Remove any existing Pods directory to ensure clean installation
-  if Dir.exist?('Pods')
-    puts "  🗑️ Removing existing Pods directory..."
-    system('rm -rf Pods')
-  end
-  
-  # Remove Podfile.lock to ensure fresh dependency resolution
-  if File.exist?('Podfile.lock')
-    puts "  🗑️ Removing existing Podfile.lock..."
-    system('rm -f Podfile.lock')
-  end
-  
-  # Remove workspace files
-  if Dir.exist?('*.xcworkspace')
-    puts "  🗑️ Removing existing workspace files..."
-    system('rm -rf *.xcworkspace')
-  end
-  
-  puts "✅ Pre-install cleanup completed!"
+  puts "🔧 Pre-install: Preparing for ultra-aggressive code signing fixes..."
+  puts "✅ Pre-install preparation completed!"
 end
 
 target 'Runner' do

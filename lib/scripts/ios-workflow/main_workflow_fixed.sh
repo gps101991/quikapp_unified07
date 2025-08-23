@@ -538,6 +538,13 @@ run_cocoapods_commands() {
         chmod +x lib/scripts/ios-workflow/generate_dynamic_podfile.sh
         if bash lib/scripts/ios-workflow/generate_dynamic_podfile.sh; then
             log_success "✅ Dynamic Podfile generated successfully"
+            
+            # Ensure we have a completely clean state for pod install
+            log_info "🧹 Ensuring clean state for pod install..."
+            rm -rf ios/Pods
+            rm -rf ios/Podfile.lock
+            rm -rf ios/*.xcworkspace
+            log_success "✅ Clean state ensured for pod install"
         else
             log_error "❌ Failed to generate dynamic Podfile"
             return 1
