@@ -289,7 +289,9 @@ if [[ -n "$BUNDLE_ID" ]]; then
     log_info "Updating bundle identifier to: $BUNDLE_ID"
     
     # List of possible default bundle IDs to replace (common Flutter defaults)
-    DEFAULT_BUNDLE_IDS=("com.example.flutter" "com.example.app" "com.example.quikapp" "com.example.quikappflutter")
+    # These are example patterns that might exist in the project files
+    # Can be overridden via DEFAULT_BUNDLE_IDS environment variable
+    DEFAULT_BUNDLE_IDS=(${DEFAULT_BUNDLE_IDS:-"com.example.flutter" "com.example.app" "com.example.quikapp" "com.example.quikappflutter"})
     
     for OLD_BUNDLE_ID in "${DEFAULT_BUNDLE_IDS[@]}"; do
         if [[ "$OLD_BUNDLE_ID" != "$BUNDLE_ID" ]]; then
