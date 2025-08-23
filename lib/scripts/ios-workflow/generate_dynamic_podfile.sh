@@ -1,3 +1,48 @@
+#!/bin/bash
+
+# Dynamic Podfile Generation Script
+# This script generates a fresh Podfile with ultra-aggressive fixes every time
+
+set -e
+
+# Colors for output
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+NC='\033[0m' # No Color
+
+log_info() {
+    echo -e "${BLUE}ℹ️ $1${NC}"
+}
+
+log_success() {
+    echo -e "${GREEN}✅ $1${NC}"
+}
+
+log_warning() {
+    echo -e "${YELLOW}⚠️ $1${NC}"
+}
+
+log_error() {
+    echo -e "${RED}❌ $1${NC}"
+}
+
+echo "🔧 Generating Dynamic Podfile with Ultra-Aggressive Fixes..."
+
+# Ensure we're in the ios directory
+cd ios || { log_error "Failed to enter ios directory"; exit 1; }
+
+# Remove existing Podfile
+if [ -f "Podfile" ]; then
+    rm -f Podfile
+    log_info "🗑️ Removed existing Podfile"
+fi
+
+# Generate fresh Podfile with ultra-aggressive fixes
+log_info "📝 Generating fresh Podfile with ultra-aggressive fixes..."
+
+cat << 'EOF' > Podfile
 # Generated Podfile with Ultra-Aggressive Fixes
 # This Podfile is dynamically generated to ensure all fixes are applied
 
@@ -158,3 +203,15 @@ post_install do |installer|
   
   puts "✅ ULTRA-AGGRESSIVE code signing fixes applied to all Pod targets!"
 end
+EOF
+
+log_success "✅ Dynamic Podfile generated successfully!"
+
+# Show the generated Podfile
+log_info "📋 Generated Podfile contents:"
+echo "----------------------------------------"
+cat Podfile
+echo "----------------------------------------"
+
+log_success "🎯 Podfile is ready with ultra-aggressive fixes!"
+log_info "🚀 Next step: Run 'pod install' to apply the fixes"

@@ -531,17 +531,57 @@ run_cocoapods_commands() {
     rm -rf ios/Pods.xcodeproj
     rm -rf ios/*.xcworkspace
     log_info "🧹 Cleaned ALL Pod-related files including workspace"
+    
+    # Generate fresh dynamic Podfile with ultra-aggressive fixes
+    log_info "🔧 Generating fresh dynamic Podfile..."
+    if [ -f "lib/scripts/ios-workflow/generate_dynamic_podfile.sh" ]; then
+        chmod +x lib/scripts/ios-workflow/generate_dynamic_podfile.sh
+        if bash lib/scripts/ios-workflow/generate_dynamic_podfile.sh; then
+            log_success "✅ Dynamic Podfile generated successfully"
+        else
+            log_error "❌ Failed to generate dynamic Podfile"
+            return 1
+        fi
+    else
+        log_warning "⚠️ Dynamic Podfile generation script not found, using existing Podfile"
+    fi
 
     # Enter ios directory
     pushd ios > /dev/null || { log_error "Failed to enter ios directory"; return 1; }
     
-    log_info "🔄 Running: pod install"
+    # Verify the dynamic Podfile was generated correctly
+    log_info "🔍 Verifying dynamic Podfile..."
+    if [ -f "Podfile" ]; then
+        log_info "✅ Podfile exists"
+        
+        # Check if it contains our ultra-aggressive fixes
+        if grep -q "ULTRA-AGGRESSIVE code signing fixes" Podfile; then
+            log_success "✅ Dynamic Podfile contains ultra-aggressive fixes"
+        else
+            log_warning "⚠️ Podfile may not contain our fixes"
+        fi
+        
+        # Check for key settings
+        if grep -q "CODE_SIGNING_STYLE.*Automatic" Podfile; then
+            log_success "✅ Podfile has automatic code signing"
+        else
+            log_warning "⚠️ Podfile missing automatic code signing"
+        fi
+        
+        if grep -q "IPHONEOS_DEPLOYMENT_TARGET.*13.0" Podfile; then
+            log_success "✅ Podfile has iOS 13.0 deployment target"
+        else
+            log_warning "⚠️ Podfile missing iOS 13.0 deployment target"
+        fi
+    else
+        log_error "❌ Podfile not found after generation"
+        return 1
+    fi
+    
+    log_info "🔄 Running: pod install --repo-update"
     log_info "Current directory: $(pwd)"
     log_info "Podfile contents:"
     cat Podfile
-
-    # Force pod install with repo update to ensure latest Podfile is used
-    log_info "🔄 Running: pod install --repo-update"
     if pod install --repo-update; then
         log_success "✅ pod install completed successfully"
         
