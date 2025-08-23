@@ -40,6 +40,25 @@ require File.expand_path(File.join('packages', 'flutter_tools', 'bin', 'podhelpe
 
 flutter_ios_podfile_setup
 
+# Pre-install hook to clean up any existing problematic settings
+pre_install do |installer|
+  puts "🧹 Pre-install: Cleaning up any existing problematic Pod settings..."
+  
+  # Remove any existing Pods directory to ensure clean installation
+  if Dir.exist?('Pods')
+    puts "  🗑️ Removing existing Pods directory..."
+    system('rm -rf Pods')
+  end
+  
+  # Remove Podfile.lock to ensure fresh dependency resolution
+  if File.exist?('Podfile.lock')
+    puts "  🗑️ Removing existing Podfile.lock..."
+    system('rm -f Podfile.lock')
+  end
+  
+  puts "✅ Pre-install cleanup completed!"
+end
+
 target 'Runner' do
   use_frameworks!
   use_modular_headers!
@@ -48,12 +67,38 @@ target 'Runner' do
 end
 
 post_install do |installer|
+  puts "🔧 Applying AGGRESSIVE code signing fixes to all Pod targets..."
+  
+  # First, fix the main Pods project to prevent inheritance
+  installer.pods_project.build_configurations.each do |config|
+    puts "  📱 Fixing main Pods project: #{config.name}"
+    config.build_settings['CODE_SIGNING_ALLOWED'] = 'NO'
+    config.build_settings['CODE_SIGNING_REQUIRED'] = 'NO'
+    config.build_settings['CODE_SIGNING_STYLE'] = 'Automatic'
+    config.build_settings['CODE_SIGN_STYLE'] = 'Automatic'
+    config.build_settings['PROVISIONING_PROFILE_SPECIFIER'] = ''
+    config.build_settings['PROVISIONING_PROFILE'] = ''
+    config.build_settings['PROVISIONING_PROFILE_UUID'] = ''
+    config.build_settings['PROVISIONING_PROFILE_NAME'] = ''
+    config.build_settings['DEVELOPMENT_TEAM'] = ''
+    config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '13.0'
+    
+    # Additional aggressive settings for main project
+    config.build_settings['CODE_SIGNING_REQUIRED[sdk=iphoneos*]'] = 'NO'
+    config.build_settings['CODE_SIGNING_ALLOWED[sdk=iphoneos*]'] = 'NO'
+    config.build_settings['CODE_SIGNING_REQUIRED[sdk=iphonesimulator*]'] = 'NO'
+    config.build_settings['CODE_SIGNING_ALLOWED[sdk=iphonesimulator*]'] = 'NO'
+  end
+  
+  # Then fix ALL individual Pod targets
   installer.pods_project.targets.each do |target|
+    puts "  🎯 Fixing Pod target: #{target.name}"
     flutter_additional_ios_build_settings(target)
     
-    # AGGRESSIVE fix for code signing and provisioning profile conflicts
     target.build_configurations.each do |config|
-      # Force automatic code signing for all Pod targets
+      puts "    📋 Configuration: #{config.name}"
+      
+      # ULTRA AGGRESSIVE code signing fixes
       config.build_settings['CODE_SIGNING_ALLOWED'] = 'NO'
       config.build_settings['CODE_SIGNING_REQUIRED'] = 'NO'
       config.build_settings['CODE_SIGNING_STYLE'] = 'Automatic'
@@ -66,6 +111,8 @@ post_install do |installer|
       config.build_settings['PROVISIONING_PROFILE_NAME'] = ''
       config.build_settings['PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]'] = ''
       config.build_settings['PROVISIONING_PROFILE[sdk=iphoneos*]'] = ''
+      config.build_settings['PROVISIONING_PROFILE_SPECIFIER[sdk=iphonesimulator*]'] = ''
+      config.build_settings['PROVISIONING_PROFILE[sdk=iphonesimulator*]'] = ''
       
       # Remove development team and code sign identity from Pod targets
       config.build_settings['DEVELOPMENT_TEAM'] = ''
@@ -76,6 +123,7 @@ post_install do |installer|
       # Set minimum iOS deployment target to 13.0 for all Pods
       config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '13.0'
       config.build_settings['IPHONEOS_DEPLOYMENT_TARGET[sdk=iphoneos*]'] = '13.0'
+      config.build_settings['IPHONEOS_DEPLOYMENT_TARGET[sdk=iphonesimulator*]'] = '13.0'
       
       # Disable bitcode for Pods
       config.build_settings['ENABLE_BITCODE'] = 'NO'
@@ -92,56 +140,23 @@ post_install do |installer|
       # Force Pod targets to use automatic signing
       config.build_settings['CODE_SIGN_STYLE'] = 'Automatic'
       
-      # Additional aggressive settings
+      # Additional aggressive settings for ALL SDK variants
       config.build_settings['CODE_SIGNING_REQUIRED[sdk=iphoneos*]'] = 'NO'
       config.build_settings['CODE_SIGNING_ALLOWED[sdk=iphoneos*]'] = 'NO'
       config.build_settings['CODE_SIGNING_REQUIRED[sdk=iphonesimulator*]'] = 'NO'
       config.build_settings['CODE_SIGNING_ALLOWED[sdk=iphonesimulator*]'] = 'NO'
+      
+      # Additional aggressive settings to prevent any inheritance
+      config.build_settings['CODE_SIGNING_REQUIRED[sdk=*]'] = 'NO'
+      config.build_settings['CODE_SIGNING_ALLOWED[sdk=*]'] = 'NO'
+      config.build_settings['PROVISIONING_PROFILE_SPECIFIER[sdk=*]'] = ''
+      config.build_settings['PROVISIONING_PROFILE[sdk=*]'] = ''
     end
   end
   
-  # Fix the main Pods project build settings
-  installer.pods_project.build_configurations.each do |config|
-    config.build_settings['CODE_SIGNING_ALLOWED'] = 'NO'
-    config.build_settings['CODE_SIGNING_REQUIRED'] = 'NO'
-    config.build_settings['CODE_SIGNING_STYLE'] = 'Automatic'
-    config.build_settings['CODE_SIGN_STYLE'] = 'Automatic'
-    config.build_settings['PROVISIONING_PROFILE_SPECIFIER'] = ''
-    config.build_settings['PROVISIONING_PROFILE'] = ''
-    config.build_settings['PROVISIONING_PROFILE_UUID'] = ''
-    config.build_settings['DEVELOPMENT_TEAM'] = ''
-    config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '13.0'
-    
-    # Additional aggressive settings for main project
-    config.build_settings['CODE_SIGNING_REQUIRED[sdk=iphoneos*]'] = 'NO'
-    config.build_settings['CODE_SIGNING_ALLOWED[sdk=iphoneos*]'] = 'NO'
-    config.build_settings['CODE_SIGNING_REQUIRED[sdk=iphonesimulator*]'] = 'NO'
-    config.build_settings['CODE_SIGNING_ALLOWED[sdk=iphonesimulator*]'] = 'NO'
-  end
+  puts "✅ AGGRESSIVE code signing fixes applied to all Pod targets!"
+end
   
-  # Fix individual Pod target projects
-  installer.pods_project.targets.each do |target|
-    target.build_configurations.each do |config|
-      # Ensure all Pod targets use automatic signing
-      config.build_settings['CODE_SIGNING_STYLE'] = 'Automatic'
-      config.build_settings['CODE_SIGNING_ALLOWED'] = 'NO'
-      config.build_settings['CODE_SIGNING_REQUIRED'] = 'NO'
-      
-      # Remove any provisioning profile references
-      config.build_settings['PROVISIONING_PROFILE_SPECIFIER'] = ''
-      config.build_settings['PROVISIONING_PROFILE'] = ''
-      config.build_settings['PROVISIONING_PROFILE_UUID'] = ''
-      config.build_settings['PROVISIONING_PROFILE_NAME'] = ''
-      
-      # Set deployment target
-      config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '13.0'
-      
-      # Additional aggressive settings for individual targets
-      config.build_settings['CODE_SIGNING_REQUIRED[sdk=iphoneos*]'] = 'NO'
-      config.build_settings['CODE_SIGNING_ALLOWED[sdk=iphoneos*]'] = 'NO'
-      config.build_settings['CODE_SIGNING_REQUIRED[sdk=iphonesimulator*]'] = 'NO'
-      config.build_settings['CODE_SIGNING_ALLOWED[sdk=iphonesimulator*]'] = 'NO'
-    end
-  end
+
   
 end

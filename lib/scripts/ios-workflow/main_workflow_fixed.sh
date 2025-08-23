@@ -523,11 +523,14 @@ run_cocoapods_commands() {
         log_info "🗑️ Removed ios/Pods directory"
     fi
     
-    # Remove all Pod-related files to ensure clean regeneration
+    # ULTRA AGGRESSIVE Pod cleanup to ensure clean regeneration
+    log_info "🧹 ULTRA AGGRESSIVE Pod cleanup..."
     rm -rf ios/Podfile.lock
     rm -rf ios/.symlinks
     rm -rf ios/Pods
-    log_info "🧹 Cleaned all Pod-related files"
+    rm -rf ios/Pods.xcodeproj
+    rm -rf ios/*.xcworkspace
+    log_info "🧹 Cleaned ALL Pod-related files including workspace"
 
     # Enter ios directory
     pushd ios > /dev/null || { log_error "Failed to enter ios directory"; return 1; }
@@ -542,7 +545,7 @@ run_cocoapods_commands() {
     if pod install --repo-update; then
         log_success "✅ pod install completed successfully"
         
-        # Verify Pod settings were applied correctly
+                # Verify Pod settings were applied correctly
         log_info "🔍 Verifying Pod settings..."
         if [ -d "Pods" ]; then
             log_info "✅ Pods directory created successfully"
@@ -552,26 +555,45 @@ run_cocoapods_commands() {
             if [ -n "$PROFILE_REFS" ]; then
                 log_warning "⚠️ Found Pod targets with provisioning profile references:"
                 echo "$PROFILE_REFS"
-                            log_info "These should be automatically resolved by the Podfile post_install hook"
-            
-            # Force re-run post_install hook if provisioning profiles are found
-            if [ -n "$PROFILE_REFS" ]; then
-                log_info "🔄 Forcing post_install hook to run again..."
-                if pod install --no-repo-update; then
-                    log_success "✅ Post_install hook re-run successfully"
-                else
-                    log_warning "⚠️ Post_install hook re-run failed"
+                log_info "These should be automatically resolved by the Podfile post_install hook"
+                
+                # Force re-run post_install hook if provisioning profiles are found
+                if [ -n "$PROFILE_REFS" ]; then
+                    log_info "🔄 Forcing post_install hook to run again..."
+                    if pod install --no-repo-update; then
+                        log_success "✅ Post_install hook re-run successfully"
+                        
+                        # Check again after re-run
+                        sleep 2
+                        PROFILE_REFS_AFTER=$(find Pods -name "*.pbxproj" -exec grep -l "PROVISIONING_PROFILE" {} \; 2>/dev/null || true)
+                        if [ -n "$PROFILE_REFS_AFTER" ]; then
+                            log_warning "⚠️ Still found provisioning profile references after post_install re-run"
+                            log_info "This indicates the Podfile fixes may not be working properly"
+                        else
+                            log_success "✅ Post_install hook successfully removed all provisioning profile references"
+                        fi
+                    else
+                        log_warning "⚠️ Post_install hook re-run failed"
+                    fi
                 fi
+            else
+                log_success "✅ No provisioning profile references found in Pods"
             fi
-        else
-            log_success "✅ No provisioning profile references found in Pods"
-        fi
             
             # Check deployment targets
             DEPLOYMENT_TARGETS=$(find Pods -name "*.pbxproj" -exec grep -h "IPHONEOS_DEPLOYMENT_TARGET" {} \; 2>/dev/null | sort | uniq || true)
             if [ -n "$DEPLOYMENT_TARGETS" ]; then
                 log_info "Current Pod deployment targets:"
                 echo "$DEPLOYMENT_TARGETS"
+                
+                # Check for any targets still using iOS 9.0
+                OLD_TARGETS=$(echo "$DEPLOYMENT_TARGETS" | grep "9\.0" || true)
+                if [ -n "$OLD_TARGETS" ]; then
+                    log_warning "⚠️ Found Pod targets still using iOS 9.0 deployment target:"
+                    echo "$OLD_TARGETS"
+                else
+                    log_success "✅ All Pod targets using iOS 13.0+ deployment target"
+                fi
             fi
         else
             log_error "❌ Pods directory not created"
